@@ -17,6 +17,7 @@ from .models import (
     SearchResult,
     StockQuote,
     StockSplit,
+    NewsArticle,
 )
 
 logger = logging.getLogger(__name__)
@@ -318,6 +319,69 @@ class MarketDataClient:
         except Exception as exc:
             logger.warning("Trending fetch failed: %s", exc)
             return []
+
+    # ------------------------------------------------------------------
+    # News
+    # ------------------------------------------------------------------
+
+    def get_news(self, symbol: str, limit: int = 10) -> list[NewsArticle]:
+        """Fetch latest news for *symbol*."""
+        ticker = self._get_ticker(symbol)
+        try:
+            news_items = ticker.news
+        except Exception as exc:
+            logger.warning("News fetch failed for %r: %s", symbol, exc)
+            return []
+
+        if not news_items:
+            return []
+
+        articles: list[NewsArticle] = []
+        for item in news_items[:limit]:
+            content = item.get("content", {})
+            if not content:
+                # Fallback for old yfinance versions that don't nest inside "content"
+                content = item
+
+            # Handle publish time
+            pub_time = None
+            pub_date_str = content.get("pubDate") or item.get("providerPublishTime")
+            if isinstance(pub_date_str, int):
+                pub_time = pub_date_str
+            elif isinstance(pub_date_str, str):
+                try:
+                    pub_time = int(datetime.fromisoformat(pub_date_str.replace("Z", "+00:00")).timestamp())
+                except ValueError:
+                    pass
+            
+            # Handle thumbnail
+            thumbnail_url = None
+            thumb = content.get("thumbnail", {})
+            if thumb and "resolutions" in thumb and thumb["resolutions"]:
+                thumbnail_url = thumb["resolutions"][0].get("url")
+            elif thumb and "originalUrl" in thumb:
+                thumbnail_url = thumb.get("originalUrl")
+
+            provider = content.get("provider", {})
+            publisher = provider.get("displayName") if isinstance(provider, dict) else item.get("publisher")
+            link = content.get("previewUrl") or (content.get("canonicalUrl", {}).get("url") if isinstance(content.get("canonicalUrl"), dict) else item.get("link"))
+            title = content.get("title") or item.get("title", "")
+            
+            # Fallbacks for id
+            article_id = content.get("id") or item.get("uuid") or item.get("id") or str(hash(title))
+
+            articles.append(
+                NewsArticle(
+                    id=article_id,
+                    title=title,
+                    publisher=publisher,
+                    link=link,
+                    provider_publish_time=pub_time,
+                    thumbnail_url=thumbnail_url,
+                )
+            )
+
+        return articles
 
 
     # ------------------------------------------------------------------

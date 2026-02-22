@@ -27,6 +27,7 @@ from .models import (
     SearchResult,
     StockQuote,
     StockSplit,
+    NewsArticle,
 )
 
 logger = logging.getLogger(__name__)
@@ -155,6 +156,19 @@ async def get_splits(symbol: str):
     except Exception as exc:
         logger.exception("Error fetching splits for %s", symbol)
         raise HTTPException(status_code=500, detail=f"Failed to fetch splits: {exc}") from exc
+
+
+@app.get("/api/v1/news/{symbol}", response_model=list[NewsArticle])
+async def get_news(
+    symbol: str,
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,
+):
+    """Get recent news articles for a stock."""
+    try:
+        return client.get_news(symbol, limit=limit)
+    except Exception as exc:
+        logger.exception("Error fetching news for %s", symbol)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch news: {exc}") from exc
 
 
 @app.get("/api/v1/search", response_model=list[SearchResult])

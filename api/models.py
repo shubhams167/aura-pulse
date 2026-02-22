@@ -101,3 +101,14 @@ class SearchResult(BaseModel):
     logo_url: str | None = None
     domain_url: str | None = None
     currency: str = "USD"
+
+
+class NewsArticle(BaseModel):
+    """A news article related to a company."""
+
+    id: str
+    title: str
+    publisher: str | None = None
+    link: str | None = None
+    provider_publish_time: int | None = None
+    thumbnail_url: str | None = None
