@@ -173,6 +173,7 @@ class MarketDataClient:
             beta=info.get("beta"),
             fifty_two_week_high=info.get("fiftyTwoWeekHigh"),
             fifty_two_week_low=info.get("fiftyTwoWeekLow"),
+            currency=info.get("currency", "USD"),
         )
 
     # ------------------------------------------------------------------
@@ -278,6 +279,7 @@ class MarketDataClient:
                     asset_type=q.get("quoteType"),
                     logo_url=logo_url,
                     domain_url=domain_url,
+                    currency=q.get("currency", "USD"),
                 )
             )
 
@@ -306,6 +308,7 @@ class MarketDataClient:
                             asset_type=q.get("quoteType"),
                             logo_url=logo_url,
                             domain_url=domain_url,
+                            currency=q.get("currency", "USD"),
                         )
                     )
                 except Exception:

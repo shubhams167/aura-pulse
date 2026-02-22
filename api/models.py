@@ -67,6 +67,7 @@ class CompanyProfile(BaseModel):
     beta: float | None = None
     fifty_two_week_high: float | None = None
     fifty_two_week_low: float | None = None
+    currency: str = "USD"
 
 
 class FinancialStatement(BaseModel):
@@ -99,3 +100,4 @@ class SearchResult(BaseModel):
     asset_type: str | None = None
     logo_url: str | None = None
     domain_url: str | None = None
+    currency: str = "USD"
