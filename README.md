@@ -1,6 +1,21 @@
 # aura-pulse
 
-A clean, typed Python wrapper around [yfinance](https://github.com/ranaroussi/yfinance) for fetching stock market data — usable as a **Python library** or as a **REST API** via FastAPI.
+A clean REST API for stock market data, powered by [yfinance](https://github.com/ranaroussi/yfinance) and [FastAPI](https://fastapi.tiangolo.com/). Designed for deployment on **Vercel** as a serverless Python function.
+
+## Project Structure
+
+```
+aura-pulse/
+├── api/
+│   ├── index.py        ← FastAPI app (Vercel entrypoint)
+│   ├── client.py       ← MarketDataClient (yfinance wrapper)
+│   ├── models.py       ← Pydantic response models
+│   └── exceptions.py   ← Custom exceptions
+├── tests/
+├── vercel.json         ← Routes all traffic to api/index.py
+├── requirements.txt    ← For Vercel's pip install
+└── pyproject.toml
+```
 
 ## Quick Start
 
@@ -12,61 +27,43 @@ A clean, typed Python wrapper around [yfinance](https://github.com/ranaroussi/yf
 ### Installation
 
 ```bash
-# Clone the repo
-git clone <repo-url>
+git clone https://github.com/shubhams167/aura-pulse.git
 cd aura-pulse
-
-# Install dependencies
 uv sync --all-extras
 ```
 
-### Use as a Python library
-
-```python
-from api.client import MarketDataClient
-
-client = MarketDataClient()
-
-# Get a live quote
-quote = client.get_quote("AAPL")
-print(f"{quote.symbol}: ${quote.price:.2f} ({quote.change_percent:+.2f}%)")
-
-# Get historical data
-history = client.get_history("MSFT", period="3mo", interval="1d")
-for bar in history.bars[:3]:
-    print(f"  {bar.date}  O:{bar.open:.2f}  H:{bar.high:.2f}  L:{bar.low:.2f}  C:{bar.close:.2f}")
-
-# Company profile
-profile = client.get_company_profile("GOOGL")
-print(f"{profile.name} — {profile.sector} / {profile.industry}")
-```
-
-### Run the REST API
+### Run Locally
 
 ```bash
-uv run uvicorn api.index:app --reload
+uv run aura-pulse
 ```
 
+The API will be available at [http://localhost:8000](http://localhost:8000).
 Open [http://localhost:8000/docs](http://localhost:8000/docs) for the interactive Swagger UI.
 
-#### Example endpoints
+### Deploy to Vercel
 
-| Method | Endpoint | Description |
+1. Import the repo on [Vercel](https://vercel.com/new).
+2. Deploy — Vercel auto-detects the Python runtime via `requirements.txt` and `vercel.json`.
+
+## API Endpoints
+
+| Method | Endpoint                      | Description              |
 |--------|-------------------------------|--------------------------|
-| GET | `/api/v1/quote/{symbol}` | Current price quote |
-| GET | `/api/v1/history/{symbol}` | Historical OHLCV bars |
-| GET | `/api/v1/profile/{symbol}` | Company profile |
-| GET | `/api/v1/financials/{symbol}` | Financial statements |
-| GET | `/api/v1/dividends/{symbol}` | Dividend history |
-| GET | `/api/v1/splits/{symbol}` | Stock split history |
-| GET | `/api/v1/search?q=...` | Search for tickers |
-| GET | `/health` | Health check |
+| GET    | `/health`                     | Health check             |
+| GET    | `/api/v1/quote/{symbol}`      | Current price quote      |
+| GET    | `/api/v1/history/{symbol}`    | Historical OHLCV bars    |
+| GET    | `/api/v1/profile/{symbol}`    | Company profile          |
+| GET    | `/api/v1/financials/{symbol}` | Financial statements     |
+| GET    | `/api/v1/dividends/{symbol}`  | Dividend history         |
+| GET    | `/api/v1/splits/{symbol}`     | Stock split history      |
+| GET    | `/api/v1/search?q=...`        | Search for tickers       |
 
-### Development
+## Development
 
 ```bash
 # Run tests
-uv run pytest -v
+uv run python -m pytest -v
 
 # Lint & format
 uv run ruff check .
