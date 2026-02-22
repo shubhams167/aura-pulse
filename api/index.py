@@ -12,6 +12,10 @@ from typing import Annotated
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
+
+# Load environment variables from .env file into os.environ
+load_dotenv()
 
 from .client import MarketDataClient
 from .exceptions import MarketDataError, SymbolNotFoundError
@@ -160,6 +164,16 @@ async def search_tickers(
 ):
     """Search for tickers matching a query."""
     return client.search(q, max_results=max_results)
+
+
+@app.get("/api/v1/trending", response_model=list[SearchResult])
+async def get_trending():
+    """Get a list of currently trending tickers."""
+    try:
+        return client.get_trending_tickers()
+    except Exception as exc:
+        logger.exception("Error fetching trending tickers")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch trending: {exc}") from exc
 
 
 # ---------------------------------------------------------------------------

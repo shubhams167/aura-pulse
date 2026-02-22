@@ -21,6 +21,8 @@ class StockQuote(BaseModel):
     market_cap: int | None = None
     currency: str = "USD"
     exchange: str | None = None
+    logo_url: str | None = None
+    domain_url: str | None = None
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
@@ -56,6 +58,8 @@ class CompanyProfile(BaseModel):
     website: str | None = None
     country: str | None = None
     employees: int | None = None
+    logo_url: str | None = None
+    domain_url: str | None = None
     market_cap: int | None = None
     pe_ratio: float | None = None
     forward_pe: float | None = None
@@ -93,3 +97,5 @@ class SearchResult(BaseModel):
     name: str | None = None
     exchange: str | None = None
     asset_type: str | None = None
+    logo_url: str | None = None
+    domain_url: str | None = None

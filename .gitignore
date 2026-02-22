@@ -32,3 +32,6 @@ uv.lock
 
 # Ruff
 .ruff_cache/
+
+# env
+.env

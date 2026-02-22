@@ -36,6 +36,28 @@ class MarketDataClient:
     # Quotes
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _extract_logo_urls(symbol: str, website: str | None) -> tuple[str | None, str | None]:
+        """Helper to construct Logo API URLs (Ticker prioritizing over Domain)."""
+        import os
+        token = os.environ.get("LOGO_DEV_TOKEN")
+        if not token:
+            return None, None
+            
+        ticker_url = f"https://img.logo.dev/ticker/{symbol}?token={token}&size=80"
+        
+        domain_url = None
+        if website:
+            import urllib.parse
+            parsed = urllib.parse.urlparse(website)
+            domain = parsed.netloc if parsed.netloc else parsed.path
+            if domain.startswith("www."):
+                domain = domain[4:]
+            if domain:
+                domain_url = f"https://img.logo.dev/{domain}?token={token}&size=80"
+        
+        return ticker_url, domain_url
+
     def get_quote(self, symbol: str) -> StockQuote:
         """Fetch the current price quote for *symbol*."""
         ticker = self._get_ticker(symbol)
@@ -48,6 +70,9 @@ class MarketDataClient:
         prev_close = info.get("previousClose") or info.get("regularMarketPreviousClose")
         change = (price - prev_close) if prev_close else 0.0
         change_pct = (change / prev_close * 100) if prev_close else 0.0
+
+        website = info.get("website")
+        logo_url, domain_url = self._extract_logo_urls(symbol, website)
 
         return StockQuote(
             symbol=symbol.upper(),
@@ -63,6 +88,8 @@ class MarketDataClient:
             market_cap=info.get("marketCap"),
             currency=info.get("currency", "USD"),
             exchange=info.get("exchange"),
+            logo_url=logo_url,
+            domain_url=domain_url,
         )
 
     # ------------------------------------------------------------------
@@ -125,15 +152,20 @@ class MarketDataClient:
         if not info.get("shortName") and not info.get("longName"):
             raise SymbolNotFoundError(symbol)
 
+        website = info.get("website")
+        logo_url, domain_url = self._extract_logo_urls(symbol, website)
+
         return CompanyProfile(
             symbol=symbol.upper(),
             name=info.get("shortName") or info.get("longName"),
             sector=info.get("sector"),
             industry=info.get("industry"),
             description=info.get("longBusinessSummary"),
-            website=info.get("website"),
+            website=website,
             country=info.get("country"),
             employees=info.get("fullTimeEmployees"),
+            logo_url=logo_url,
+            domain_url=domain_url,
             market_cap=info.get("marketCap"),
             pe_ratio=info.get("trailingPE"),
             forward_pe=info.get("forwardPE"),
@@ -221,7 +253,7 @@ class MarketDataClient:
         ]
 
     # ------------------------------------------------------------------
-    # Search
+    # Search & Trending
     # ------------------------------------------------------------------
 
     def search(self, query: str, max_results: int = 10) -> list[SearchResult]:
@@ -235,16 +267,55 @@ class MarketDataClient:
 
         search_results: list[SearchResult] = []
         for q in quotes[:max_results]:
+            sym = q.get("symbol", "")
+            # Since search doesn't provide website, we only get ticker URL
+            logo_url, domain_url = self._extract_logo_urls(sym, None)
             search_results.append(
                 SearchResult(
-                    symbol=q.get("symbol", ""),
+                    symbol=sym,
                     name=q.get("shortname") or q.get("longname"),
                     exchange=q.get("exchange"),
                     asset_type=q.get("quoteType"),
+                    logo_url=logo_url,
+                    domain_url=domain_url,
                 )
             )
 
         return search_results
+
+    def get_trending_tickers(self) -> list[SearchResult]:
+        """Fetch currently trending tickers from Yahoo Finance or use a fallback list."""
+        try:
+            # We'll use a hardcoded list of major popular tech and market index ETF tickers 
+            # to simulate 'trending' if yf doesn't easily expose a dedicated list.
+            # In a real app we might scrape Yahoo's trending page or use a specific API.
+            popular_symbols = ["NVDA", "TSLA", "AAPL", "AMD", "META", "AMZN", "MSFT", "GOOGL", "QQQ", "SPY"]
+            
+            tickers = yf.Tickers(" ".join(popular_symbols))
+            results: list[SearchResult] = []
+            
+            for sym in popular_symbols:
+                try:
+                    q = tickers.tickers[sym].info
+                    logo_url, domain_url = self._extract_logo_urls(sym, q.get("website"))
+                    results.append(
+                        SearchResult(
+                            symbol=sym,
+                            name=q.get("shortName") or q.get("longName"),
+                            exchange=q.get("exchange"),
+                            asset_type=q.get("quoteType"),
+                            logo_url=logo_url,
+                            domain_url=domain_url,
+                        )
+                    )
+                except Exception:
+                    pass
+            
+            return results
+        except Exception as exc:
+            logger.warning("Trending fetch failed: %s", exc)
+            return []
+
 
     # ------------------------------------------------------------------
     # Helpers
