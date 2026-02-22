@@ -1,8 +1,8 @@
 """aura-pulse — A clean, typed Python wrapper around yfinance."""
 
-from .client import MarketDataClient
-from .exceptions import MarketDataError, RateLimitError, SymbolNotFoundError
-from .models import (
+from api.client import MarketDataClient
+from api.exceptions import MarketDataError, RateLimitError, SymbolNotFoundError
+from api.models import (
     CompanyProfile,
     DividendEvent,
     FinancialStatement,

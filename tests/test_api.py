@@ -6,9 +6,9 @@ from unittest.mock import patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from aura_pulse.api.app import app
-from aura_pulse.exceptions import SymbolNotFoundError
-from aura_pulse.models import (
+from api.index import app
+from api.exceptions import SymbolNotFoundError
+from api.models import (
     CompanyProfile,
     DividendEvent,
     HistoricalBar,
@@ -21,7 +21,7 @@ from aura_pulse.models import (
 
 @pytest.fixture
 def mock_client():
-    with patch("aura_pulse.api.app.client") as mock:
+    with patch("api.index.client") as mock:
         yield mock
 
 

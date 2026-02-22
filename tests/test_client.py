@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from aura_pulse.client import MarketDataClient
-from aura_pulse.exceptions import SymbolNotFoundError
+from api.client import MarketDataClient
+from api.exceptions import SymbolNotFoundError
 
 
 @pytest.fixture
@@ -86,7 +86,7 @@ def _mock_financials():
 
 
 class TestGetQuote:
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_success(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.info = MOCK_INFO
@@ -100,7 +100,7 @@ class TestGetQuote:
         assert quote.change == round(182.52 - 180.75, 4)
         assert quote.currency == "USD"
 
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_symbol_not_found(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.info = {}
@@ -115,7 +115,7 @@ class TestGetQuote:
 
 
 class TestGetHistory:
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_success(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.history.return_value = _mock_history_df()
@@ -129,7 +129,7 @@ class TestGetHistory:
         assert history.bars[0].close == 153.0
         assert history.bars[1].volume == 1_200_000
 
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_empty_history(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.history.return_value = pd.DataFrame()
@@ -140,7 +140,7 @@ class TestGetHistory:
 
 
 class TestGetCompanyProfile:
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_success(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.info = MOCK_INFO
@@ -153,7 +153,7 @@ class TestGetCompanyProfile:
         assert profile.industry == "Consumer Electronics"
         assert profile.pe_ratio == 28.5
 
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_not_found(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.info = {}
@@ -164,7 +164,7 @@ class TestGetCompanyProfile:
 
 
 class TestGetFinancials:
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_income_statement(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.financials = _mock_financials()
@@ -175,7 +175,7 @@ class TestGetFinancials:
         assert len(statements) == 2
         assert statements[0].data["Total Revenue"] == 94_930_000_000
 
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_empty_financials(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.financials = pd.DataFrame()
@@ -186,7 +186,7 @@ class TestGetFinancials:
 
 
 class TestGetDividends:
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_success(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.dividends = _mock_dividends()
@@ -199,7 +199,7 @@ class TestGetDividends:
 
 
 class TestGetSplits:
-    @patch("aura_pulse.client.yf.Ticker")
+    @patch("api.client.yf.Ticker")
     def test_success(self, mock_ticker_cls, client):
         mock_ticker = MagicMock()
         mock_ticker.splits = _mock_splits()

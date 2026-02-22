@@ -23,7 +23,7 @@ uv sync --all-extras
 ### Use as a Python library
 
 ```python
-from aura_pulse import MarketDataClient
+from api.client import MarketDataClient
 
 client = MarketDataClient()
 
@@ -44,7 +44,7 @@ print(f"{profile.name} — {profile.sector} / {profile.industry}")
 ### Run the REST API
 
 ```bash
-uv run uvicorn aura_pulse.api.app:app --reload
+uv run uvicorn api.index:app --reload
 ```
 
 Open [http://localhost:8000/docs](http://localhost:8000/docs) for the interactive Swagger UI.

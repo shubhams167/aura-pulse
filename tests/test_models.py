@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from aura_pulse.models import (
+from api.models import (
     CompanyProfile,
     DividendEvent,
     FinancialStatement,
