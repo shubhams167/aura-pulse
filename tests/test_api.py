@@ -40,7 +40,7 @@ async def http_client():
 class TestHealthEndpoint:
     @pytest.mark.asyncio
     async def test_health(self, http_client):
-        resp = await http_client.get("/health")
+        resp = await http_client.get("/")
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "healthy"

@@ -50,7 +50,7 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs) for the interactiv
 
 | Method | Endpoint                      | Description              |
 |--------|-------------------------------|--------------------------|
-| GET    | `/health`                     | Health check             |
+| GET    | `/`                           | Health check             |
 | GET    | `/api/v1/quote/{symbol}`      | Current price quote      |
 | GET    | `/api/v1/history/{symbol}`    | Historical OHLCV bars    |
 | GET    | `/api/v1/profile/{symbol}`    | Company profile          |

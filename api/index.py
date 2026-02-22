@@ -68,7 +68,7 @@ async def market_data_error_handler(_request, exc: MarketDataError):
 # ---------------------------------------------------------------------------
 
 
-@app.get("/health")
+@app.get("/")
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "service": "aura-pulse"}
