@@ -29,7 +29,7 @@ class StockQuote(BaseModel):
 class HistoricalBar(BaseModel):
     """A single OHLCV bar."""
 
-    date: date
+    date: str
     open: float
     high: float
     low: float

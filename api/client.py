@@ -118,9 +118,16 @@ class MarketDataClient:
         if df.empty:
             raise SymbolNotFoundError(symbol)
 
+        is_intraday = interval in ("1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h")
         bars: list[HistoricalBar] = []
         for idx, row in df.iterrows():
-            bar_date = idx.date() if isinstance(idx, (datetime,)) else idx
+            if is_intraday and isinstance(idx, datetime):
+                bar_date = idx.isoformat()
+            elif isinstance(idx, datetime):
+                bar_date = idx.date().isoformat()
+            else:
+                bar_date = str(idx)
+                
             bars.append(
                 HistoricalBar(
                     date=bar_date,
